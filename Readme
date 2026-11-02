@@ -1,0 +1,75 @@
+# Linux File Permissions: Managing Authorization
+
+A hands-on lab in least-privilege access control using the Linux command line.
+
+## Scenario
+
+As a security analyst, I audited the `/home/researcher2/projects` directory, owned by `researcher2` (group: `research_team`). The goal: find permissions that grant more access than intended, and fix them, including hidden files.
+
+## Skills Demonstrated
+
+- Reading and interpreting permission strings (`drwx--x---`, `-rw-rw-rw-`)
+- Auditing files, including hidden ones, with `ls -la`
+- Changing permissions with `chmod` (symbolic and octal)
+- Applying the principle of least privilege to files and directories
+
+## Permission Model
+
+| Position | Meaning |
+|----------|---------|
+| 1st char | File type (`d` directory, `-` file) |
+| 2nd-4th | User (owner) `rwx` |
+| 5th-7th | Group `rwx` |
+| 8th-10th | Other `rwx` |
+
+## Audit and Fixes
+
+### 1. Inspect everything, hidden files included
+
+```bash
+cd projects
+ls -l      # visible files
+ls -la     # includes hidden files (.project_x.txt)
+```
+
+### 2. Remove write access for "other"
+
+`project_k.txt` was world-writable (`-rw-rw-rw-`).
+
+```bash
+chmod o-w project_k.txt
+```
+
+### 3. Restrict a confidential file to its owner
+
+`project_m.txt` was readable by the group. Only the user should access it.
+
+```bash
+chmod g-r project_m.txt      # result: -rw-------
+```
+
+
+### 4. Restrict the drafts directory
+
+Only `researcher2` should enter `drafts`. Removing group execute blocks traversal.
+
+```bash
+chmod g-x drafts             # result: drwx------
+```
+
+### 5. Verify
+
+```bash
+ls -la
+```
+
+## Key Takeaways
+
+- Hidden files are easy to miss; always audit with `ls -la`.
+- On directories, `x` controls whether you can enter them. Removing it is how you close access.
+- World-writable files are a standing risk: any user on the system can alter them.
+- Least privilege is a habit: grant only what the role needs.
+
+## Tools
+
+Linux, Bash, `ls`, `chmod`
